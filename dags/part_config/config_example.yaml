@@ -1,0 +1,38 @@
+kind: partitioning
+api: v2
+schema: test_part
+tags:
+  - partitioning
+email:
+  - no_@mail.ru
+start_date: "2021-04-01"
+owner: c
+access_control:
+  - test
+schedule: 0 0 1 * *
+tables:
+  - table: test_part
+    operations:
+      - operation: create_partitions
+        granularity: 1 year
+        lower_bound: 2 year
+        upper_bound: 9 month
+      - operation: create_partitions
+        granularity: 3 month
+        lower_bound: 1 year
+        upper_bound: 2 month
+      - operation: create_partitions
+        granularity: 1 month
+        lower_bound: 3 month
+        upper_bound: -3 month
+      - operation: merge_partitions
+        granularity: 3 month
+        lower_bound: 1 year
+        upper_bound: 3 month
+        table_space: warm
+        limit_operations: 2
+        access_exclusive_mode: false
+      - operation: unload_to_s3_partitions
+        lower_bound: 5 year
+        upper_bound: 1 year
+        s3_server_name: s3srv
