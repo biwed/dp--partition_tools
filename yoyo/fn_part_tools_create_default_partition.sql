@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_create_default_partition(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING)
-RETURNS VOID
+ RETURNS VOID
 LANGUAGE plpgsql
 AS
 $$

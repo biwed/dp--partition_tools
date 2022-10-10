@@ -6,6 +6,7 @@ import logging
 import traceback
 from airflow import DAG
 from airflow.operators.postgres_operator import PostgresOperator
+from airflow.hooks.base_hook import BaseHook
 
 
 dag_folder = os.path.dirname(os.path.abspath(__file__)) + "part_config"
@@ -16,6 +17,21 @@ sys.path.insert(0, dag_folder)
 DAG_OWNER_NAME = "bi_lab"
 CONNECTION_ID = "gp_db"
 POOL = "partitioning"
+PG_TARGET_CONNECTION_ID = 'bi_bot'
+
+def yoyo_migratioon(): 
+    from yoyo import read_migrations 
+    from yoyo import get_backend 
+    """Функция инициализирует клиента, для работы с S3. 
+    """ 
+    yoyo_uri = BaseHook.get_connection(PG_TARGET_CONNECTION_ID).get_uri() 
+    migrations = read_migrations('/yoyo/migrations') 
+    backend = get_backend(yoyo_uri) 
+    with backend.lock(): 
+        logging.info("Migration") 
+        backend.apply_migrations(backend.to_apply(migrations))
+
+
 
 
 def create_sql_query(table_name: str, schema_name: str, meta_object: dict) -> str:
