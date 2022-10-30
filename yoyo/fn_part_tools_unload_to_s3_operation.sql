@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_unload_to_s3_operation(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_unload_to_s3_operation(
         p_schema_name CHARACTER VARYING,
         p_table_name CHARACTER VARYING,
         p_partition_start DATE,
@@ -27,8 +27,8 @@ DECLARE
     var_row_count BIGINT;
    	var_count_sql TEXT;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
     
     SELECT 
         partitiontablename, partitionname INTO var_name_part_table, var_name_part
@@ -38,14 +38,14 @@ BEGIN
         part.schemaname = p_schema_name
         AND part.tablename = p_table_name
         AND NOT part.partitionisdefault
-        AND partitining_tool.fn_eval(part.partitionrangestart)::DATE = p_partition_start::DATE;
+        AND partitioning_tool.fn_eval(part.partitionrangestart)::DATE = p_partition_start::DATE;
 
     var_s3_connect = 'pxf://'|| p_s3_bucket 
         ||'/' || p_schema_name ||'/'||p_table_name || '/' || var_name_part || '_ext_s3'
         || '?PROFILE=s3:text&SERVER='|| p_s3_server_name 
         || '&COMPRESSION_CODEC=org.apache.hadoop.io.compress.GzipCodec';
 
-    var_table_owner = partitining_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
+    var_table_owner = partitioning_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
     var_target_table_name = p_schema_name || '.' || p_table_name;
     var_end_table = MD5(random()::TEXT)::VARCHAR(12);
     var_tmp_table_name_part = var_target_table_name ||'_tmp_part_ext'|| var_end_table;

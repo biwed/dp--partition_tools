@@ -1,0 +1,4 @@
+-- fn_part_tools_check_table_space
+-- depends: 20221010_04_4PaJM-fn_part_tools_check_is_table_ready_partitioning
+
+DROP FUNCTION partitioning_tool.fn_part_tools_check_table_space(p_table_space TEXT);

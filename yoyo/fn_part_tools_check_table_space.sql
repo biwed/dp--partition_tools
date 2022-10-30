@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_check_table_space(p_table_space TEXT)
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_check_table_space(p_table_space TEXT)
     RETURNS void
 LANGUAGE plpgsql
 

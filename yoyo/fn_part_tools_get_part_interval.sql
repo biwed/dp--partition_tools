@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_get_part_interval(
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_get_part_interval(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_granularity INTERVAL,
@@ -27,8 +27,8 @@ begin
 
     CREATE TEMP TABLE tmp_get_part_interval AS
     SELECT
-        partitining_tool.fn_eval(part.partitionrangestart)::TIMESTAMP AS partitionrangestart,
-        partitining_tool.fn_eval(part.partitionrangeend)::TIMESTAMP AS partitionrangeend,
+        partitioning_tool.fn_eval(part.partitionrangestart)::TIMESTAMP AS partitionrangestart,
+        partitioning_tool.fn_eval(part.partitionrangeend)::TIMESTAMP AS partitionrangeend,
         part.partitiontablename::TEXT,
         part.partitionrank,
         part.partitiontablespace::TEXT
@@ -69,7 +69,7 @@ begin
                         t.lower_bound,
                         t.upper_bound
                     FROM
-                        partitining_tool.fn_part_tools_get_interval(
+                        partitioning_tool.fn_part_tools_get_interval(
                             p_granularity,
                             p_lower_bound,
                             p_upper_bound

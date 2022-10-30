@@ -39,18 +39,19 @@
 # Feel free to modify this file to suit your needs.
 ---
 version: '3'
+x-base-image: &base_image 
+  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.4}
 x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.4}
   # build: .
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW_UID: 50000
+    # AIRFLOW_UID: 1001
     # For backward compatibility, with Airflow <2.3
     AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
@@ -58,10 +59,11 @@ x-airflow-common:
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
+    AIRFLOW__WEBSERVER__SECRET_KEY: 'YGr6iWew8HeuUDExPRKglev0oRFq2kU1wQQl10ZtoQg='
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
-  # volumes:
-    # - ./dags:/opt/airflow/dags
+  volumes:
+    - ./dags:/opt/airflow/dags
     # - ./logs:/opt/airflow/logs
     # - ./plugins:/opt/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
@@ -99,6 +101,7 @@ services:
     restart: always
 
   airflow-webserver:
+    << : *base_image
     <<: *airflow-common
     command: webserver
     ports:
@@ -115,6 +118,7 @@ services:
         condition: service_completed_successfully
 
   airflow-scheduler:
+    << : *base_image
     <<: *airflow-common
     command: scheduler
     healthcheck:
@@ -127,9 +131,20 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+  #  worker:
+  #   container_name: airflow_worker
+  #   build: 
+  #     context: .
+  #   restart: always
+  #   depends_on: 
+  #     - webserver
+  #     - scheduler
 
   airflow-worker:
     <<: *airflow-common
+    container_name: airflow_worker
+    build: 
+      context: .
     command: celery worker
     healthcheck:
       test:
@@ -150,6 +165,7 @@ services:
         condition: service_completed_successfully
 
   airflow-triggerer:
+    << : *base_image
     <<: *airflow-common
     command: triggerer
     healthcheck:
@@ -164,6 +180,7 @@ services:
         condition: service_completed_successfully
 
   airflow-init:
+    << : *base_image
     <<: *airflow-common
     entrypoint: /bin/bash
     # yamllint disable rule:line-length
@@ -242,6 +259,7 @@ services:
       - .:/sources
 
   airflow-cli:
+    <<: *base_image
     <<: *airflow-common
     profiles:
       - debug
@@ -258,6 +276,7 @@ services:
   # or by explicitly targeted on the command line e.g. docker-compose up flower.
   # See: https://docs.docker.com/compose/profiles/
   flower:
+    <<: *base_image
     <<: *airflow-common
     command: celery flower
     profiles:

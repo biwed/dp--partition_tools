@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_check_is_table_has_partitions(
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_check_is_table_has_partitions(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING
 )

@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_move_operation(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_move_operation(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_partition_start DATE,
@@ -20,9 +20,9 @@ DECLARE
     var_table_owner TEXT;
     var_name_part TEXT;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_check_table_space(p_table_space);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_table_space(p_table_space);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     SELECT partitiontablename INTO var_name_part
     FROM
@@ -31,9 +31,9 @@ BEGIN
         part.schemaname = p_schema_name
         AND part.tablename = p_table_name
         AND NOT part.partitionisdefault
-        AND partitining_tool.fn_eval(part.partitionrangestart)::DATE = p_partition_start::DATE;
+        AND partitioning_tool.fn_eval(part.partitionrangestart)::DATE = p_partition_start::DATE;
 
-    var_table_owner = partitining_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
+    var_table_owner = partitioning_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
     var_target_table_name = p_schema_name || '.' || p_table_name;
     var_tmp_table_name_part = var_target_table_name ||'_tmp_part_mv'|| MD5(random()::TEXT)::VARCHAR(12);
     var_sql_exec = 'drop table if exists ' || var_tmp_table_name_part || ' cascade;';

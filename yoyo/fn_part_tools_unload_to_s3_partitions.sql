@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_unload_to_s3_partitions(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_unload_to_s3_partitions(
     p_schema_name character varying,
     p_table_name character varying,
     p_lower_bound interval,
@@ -16,14 +16,14 @@ DECLARE
     var_row  RECORD;
     var_curs refcursor;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     OPEN
         var_curs for 
             SELECT part.partitionrangestart as move_part
             from
-                partitining_tool.fn_part_tools_get_part_table_spase(p_schema_name, p_table_name) as part
+                partitioning_tool.fn_part_tools_get_part_table_spase(p_schema_name, p_table_name) as part
             where
                 not partitiontablespace = 's3'
                 and partitionrangestart >= now() - p_lower_bound
@@ -32,7 +32,7 @@ BEGIN
         LOOP
             FETCH FROM var_curs INTO var_row;
             EXIT WHEN NOT FOUND;
-                PERFORM partitining_tool.fn_part_tools_unload_to_s3_operation(
+                PERFORM partitioning_tool.fn_part_tools_unload_to_s3_operation(
                     p_schema_name,
                     p_table_name,
                     var_row.move_part::date,

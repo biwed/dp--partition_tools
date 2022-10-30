@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_delete_operation(
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_delete_operation(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_partition_start DATE
@@ -14,8 +14,8 @@ DECLARE
     var_sql_transaction TEXT = '';
 BEGIN
 
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     var_target_table_name = p_schema_name || '.' || p_table_name;
     var_sql_transaction = ' ALTER TABLE ' || var_target_table_name

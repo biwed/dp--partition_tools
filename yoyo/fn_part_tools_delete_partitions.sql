@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_delete_partitions(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_delete_partitions(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_lower_bound INTERVAL,
@@ -22,14 +22,14 @@ DECLARE
     var_finaly_sql TEXT;
     var_slice JSON;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     OPEN
         var_curs for 
             SELECT part.partitionrangestart as move_part
             FROM
-                partitining_tool.fn_part_tools_get_part_table_spase(p_schema_name, p_table_name) as part
+                partitioning_tool.fn_part_tools_get_part_table_spase(p_schema_name, p_table_name) as part
             WHERE
                 partitionrangestart >= now() - p_lower_bound
                 AND part.partitionrangestart < now() - p_upper_bound
@@ -38,7 +38,7 @@ BEGIN
         LOOP
             FETCH FROM var_curs INTO var_row;
             EXIT WHEN NOT FOUND;
-                PERFORM partitining_tool.fn_part_tools_delete_operation(
+                PERFORM partitioning_tool.fn_part_tools_delete_operation(
                     p_schema_name,
                     p_table_name,
                     var_row.move_part::DATE

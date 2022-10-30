@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_get_table_owner(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_get_table_owner(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING
 )

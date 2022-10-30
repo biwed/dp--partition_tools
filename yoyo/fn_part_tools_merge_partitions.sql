@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_merge_partitions(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_merge_partitions(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_lower_bound INTERVAL, 
@@ -26,16 +26,16 @@ DECLARE
     var_finaly_sql TEXT;
     var_slice json;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_check_table_space(p_table_space);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_table_space(p_table_space);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     var_target_table_name = p_schema_name || '.' || p_table_name;
     var_tmp_table_name_part = var_target_table_name ||'_tmp_pct';
     OPEN
         var_curs for 
             SELECT *
-            FROM partitining_tool.fn_part_tools_get_part_interval(p_schema_name,
+            FROM partitioning_tool.fn_part_tools_get_part_interval(p_schema_name,
                                                 p_table_name,
                                                 p_granularity,
                                                 p_lower_bound, 
@@ -46,7 +46,7 @@ BEGIN
         LOOP
             FETCH FROM var_curs INTO var_row;
             EXIT WHEN NOT FOUND;
-                PERFORM partitining_tool.fn_part_tools_create_operation(
+                PERFORM partitioning_tool.fn_part_tools_create_operation(
                     p_schema_name,
                     p_table_name, 
                     p_granularity, 
@@ -55,12 +55,12 @@ BEGIN
                 RAISE NOTICE 'Split default partitions %', var_row;
         END LOOP;
     CLOSE var_curs;
-    perform partitining_tool.fn_part_tools_create_missing_partitions(p_schema_name, p_table_name, '1 day');
+    perform partitioning_tool.fn_part_tools_create_missing_partitions(p_schema_name, p_table_name, '1 day');
 
     OPEN
         var_curs for 
             SELECT *
-            FROM partitining_tool.fn_part_tools_get_part_interval(
+            FROM partitioning_tool.fn_part_tools_get_part_interval(
                 p_schema_name,
                 p_table_name,
                 p_granularity,
@@ -74,7 +74,7 @@ BEGIN
             FETCH FROM var_curs INTO var_row;
             EXIT WHEN NOT FOUND;
                 RAISE NOTICE 'Split partition %', var_row;
-                PERFORM partitining_tool.fn_part_tools_split_operation(
+                PERFORM partitioning_tool.fn_part_tools_split_operation(
                     p_schema_name,
                     p_table_name, 
                     GREATEST(var_row.curr_lower_bound, var_row.partitionrangestart)::DATE, 
@@ -96,7 +96,7 @@ BEGIN
                 part_num,
                 lower_bound, 
                 upper_bound 
-            FROM partitining_tool.fn_part_tools_get_part_interval(
+            FROM partitioning_tool.fn_part_tools_get_part_interval(
             p_schema_name,
                 p_table_name,
                 p_granularity,
@@ -118,7 +118,7 @@ BEGIN
         EXIT WHEN NOT FOUND;
             SELECT
                 array_to_json(array_agg(row_to_json(t))) INTO var_slice
-            FROM partitining_tool.fn_part_tools_get_part_interval(
+            FROM partitioning_tool.fn_part_tools_get_part_interval(
                     p_schema_name,
                     p_table_name,
                     p_granularity,
@@ -126,7 +126,7 @@ BEGIN
                     p_upper_bound) AS t
             WHERE t.part_num = var_row.part_num::BIGINT;
 
-            PERFORM partitining_tool.fn_part_tools_merge_operation(
+            PERFORM partitioning_tool.fn_part_tools_merge_operation(
                 p_schema_name,
                 p_table_name,
                 var_row.lower_bound::DATE,

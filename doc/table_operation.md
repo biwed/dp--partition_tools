@@ -132,7 +132,7 @@ delete_partitions - применяется для физического уда�
 Перекрытие create и merge приветствуется. Вызов менеждеров согласно очередности по операциям и очередности в YAML схеме. Проверяем для каждой таблицы запросом:
 ``` sql 
 SELECT *
-FROM partitining_tool.fn_part_tools_get_config_intvals(
+FROM partitioning_tool.fn_part_tools_get_config_intvals(
 $$ [
     {
       "operation": "merge_partitions",
@@ -166,7 +166,7 @@ FROM pg_tablespace
 Определение интервалов для одной таблицы:
 ```sql
 SELECT *
-FROM partitining_tool.fn_part_tools_get_config_intvals(
+FROM partitioning_tool.fn_part_tools_get_config_intvals(
 $$ [
     {
       "operation": "merge_partitions",
@@ -203,8 +203,8 @@ ORDER BY 1, 6
 
 Функция проверки конфигурации:
 ```sql
-SELECT partitining_tool.fn_part_tools_check_config(
-  p_schema_name := 'partitining_tool',
+SELECT partitioning_tool.fn_part_tools_check_config(
+  p_schema_name := 'partitioning_tool',
   p_table_name := 'sales_test',
   p_config := '[{"granularity": "1 month", "lower_bound": "1 year", "operation": "create_partitions", "upper_bound": "-3 month"}, {"granularity": "1 year", "lower_bound": "10 year", "operation": "create_partitions", "upper_bound": "1 year"}, {"access_exclusive_mode": false, "granularity": "1 year", "limit_operations": 2, "lower_bound": "10 year", "operation": "merge_partitions", "table_space": "warm", "upper_bound": "1 year"}, {"access_exclusive_mode": false, "limit_operations": 2, "lower_bound": "5 year", "operation": "move_partitions", "table_space": "warm", "upper_bound": "1 year"}, {"access_exclusive_mode": false, "limit_operations": 2, "lower_bound": "6 year", "operation": "unload_to_s3_partitions", "upper_bound": "5 year"}]'::json
 )
@@ -213,6 +213,6 @@ SELECT partitining_tool.fn_part_tools_check_config(
 Функция проверки расположения партиций по табличным пространстам:
 ```sql
 SELECT *
-FROM partitining_tool.fn_part_tools_get_part_table_spase('partitining_tool', 'sales_test')
+FROM partitioning_tool.fn_part_tools_get_part_table_spase('partitioning_tool', 'sales_test')
 ```
 

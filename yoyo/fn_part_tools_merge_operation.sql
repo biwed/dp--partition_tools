@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_merge_operation(
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_merge_operation(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_partition_start DATE,
@@ -23,11 +23,11 @@ DECLARE
     var_table_owner TEXT;
     var_sql_transaction TEXT;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_check_table_space(p_table_space);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_table_space(p_table_space);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
-    var_table_owner = partitining_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
+    var_table_owner = partitioning_tool.fn_part_tools_get_table_owner(p_schema_name, p_table_name);
     var_target_table_name = p_schema_name || '.' || p_table_name;
     var_tmp_table_name_part = var_target_table_name ||'_tmp_part_mrg'|| MD5(random()::TEXT)::varchar(12);
     var_sql_exec = 'drop table if exists ' || var_tmp_table_name_part || ' cascade;';
@@ -62,7 +62,7 @@ BEGIN
        	RAISE NOTICE 'var_sql_transaction  %', var_sql_transaction;
         BEGIN
         EXECUTE var_sql_transaction;
-        perform partitining_tool.fn_part_tools_create_operation(p_schema_name, p_table_name, p_granularity, p_partition_start, (p_partition_start + p_granularity)::date);
+        perform partitioning_tool.fn_part_tools_create_operation(p_schema_name, p_table_name, p_granularity, p_partition_start, (p_partition_start + p_granularity)::date);
         EXECUTE var_finaly_sql;
         RAISE NOTICE 'var_sql_exec  %', var_finaly_sql;
         END;
@@ -74,7 +74,7 @@ BEGIN
         EXECUTE  var_insert_sql;
         RAISE NOTICE 'var_sql_exec  %', var_sql_alter;
         EXECUTE  var_sql_alter;
-        perform partitining_tool.fn_part_tools_create_operation(p_schema_name, p_table_name, p_granularity, p_partition_start, (p_partition_start + p_granularity)::date);
+        perform partitioning_tool.fn_part_tools_create_operation(p_schema_name, p_table_name, p_granularity, p_partition_start, (p_partition_start + p_granularity)::date);
         RAISE NOTICE 'var_finaly_sql  %', var_finaly_sql;
         EXECUTE var_finaly_sql;
     END IF;

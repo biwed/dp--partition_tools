@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_get_part_table_spase(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_get_part_table_spase(
         p_schema_name character varying,
         p_table_name character varying
     )
@@ -20,7 +20,7 @@ begin
             part.schemaname::text,
             part.tablename::text,
             coalesce(substring(part.partitionname from 'ext_([[a-zA-Z0-9]+?)$'), part.partitiontablespace)::text as partitiontablespace,
-            partitining_tool.fn_eval(part.partitionrangestart)::date as partitionrangestart
+            partitioning_tool.fn_eval(part.partitionrangestart)::date as partitionrangestart
         from
             pg_catalog.pg_partitions as part
         where

@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_eval(p_str text)
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_eval(p_str text)
 RETURNS text
 LANGUAGE plpgsql
 VOLATILE

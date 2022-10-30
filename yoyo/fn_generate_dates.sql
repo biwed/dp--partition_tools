@@ -1,5 +1,5 @@
 
-CREATE OR REPLACE FUNCTION partitining_tool.generate_dates(
+CREATE OR REPLACE FUNCTION partitioning_tool.generate_dates(
   p_start anyelement, 
   p_finish anyelement, 
   p_granularity INTERVAL

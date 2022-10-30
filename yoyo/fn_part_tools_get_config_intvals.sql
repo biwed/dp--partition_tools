@@ -1,4 +1,4 @@
-CREATE OR REPLACE function partitining_tool.fn_part_tools_get_config_intvals(
+CREATE OR REPLACE function partitioning_tool.fn_part_tools_get_config_intvals(
     p_config JSON
 )
 RETURNS TABLE (
@@ -25,7 +25,7 @@ BEGIN
             CASE WHEN (value::JSON)->>'operation' IN ('merge_partitions', 'create_partitions')
                 THEN (
                     SELECT min(t_min.lower_bound)::TIMESTAMP 
-                    FROM partitining_tool.fn_part_tools_get_interval(
+                    FROM partitioning_tool.fn_part_tools_get_interval(
                             p_granularity:= ((value::JSON)->>'granularity')::INTERVAL,
                             p_lower_bound:= ((value::JSON)->>'lower_bound')::INTERVAL,
                             p_upper_bound:= ((value::JSON)->>'upper_bound')::interval
@@ -36,7 +36,7 @@ BEGIN
             CASE WHEN (value::JSON)->>'operation' IN ('merge_partitions', 'create_partitions')
                 THEN (
                     SELECT max(t_max.upper_bound)::TIMESTAMP
-                    FROM partitining_tool.fn_part_tools_get_interval(
+                    FROM partitioning_tool.fn_part_tools_get_interval(
                             p_granularity:= ((value::JSON)->>'granularity')::INTERVAL,
                             p_lower_bound:= ((value::JSON)->>'lower_bound')::INTERVAL,
                             p_upper_bound:= ((value::JSON)->>'upper_bound')::INTERVAL

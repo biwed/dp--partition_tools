@@ -26,7 +26,7 @@ SELECT *
 FROM test_part.sales_test;
 
 SELECT *
-FROM partitining_tool.fn_part_tools_create_partitions(
+FROM partitioning_tool.fn_part_tools_create_partitions(
     p_schema_name:= 'test_part',
     p_table_name:= 'sales_test',
     p_granularity:= '1 month'::interval,
@@ -36,4 +36,4 @@ FROM partitining_tool.fn_part_tools_create_partitions(
 );
 
 select *
-from partitining_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test');
+from partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test');

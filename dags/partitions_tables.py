@@ -32,13 +32,11 @@ def yoyo_migratioon():
         backend.apply_migrations(backend.to_apply(migrations))
 
 
-
-
 def create_sql_query(table_name: str, schema_name: str, meta_object: dict) -> str:
     """
     Функция создает sql запрос для каждого оператора
     """
-    sql_query = f"SELECT partitining_tool.fn_part_tools_{meta_object['operation']}"
+    sql_query = f"SELECT partitioning_tool.fn_part_tools_{meta_object['operation']}"
     sql_query += f"(p_table_name := '{table_name}', p_schema_name:= '{schema_name}'"
         
     for key, value in meta_object.items():
@@ -95,7 +93,7 @@ def create_dag(dag_id, config):
             table_name = table_spec['table']
             table_verif = PostgresOperator(
                 task_id=f'{table_name}_check_config',
-                sql=f"""select partitining_tool.fn_part_tools_check_config(
+                sql=f"""select partitioning_tool.fn_part_tools_check_config(
                     p_schema_name := '{schema_name}',
                     p_table_name := '{table_name}',
                     p_config := '{json.dumps(table_spec['operations'])}'::json

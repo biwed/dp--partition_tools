@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION partitining_tool.fn_part_tools_split_operation(
+CREATE OR REPLACE FUNCTION partitioning_tool.fn_part_tools_split_operation(
     p_schema_name CHARACTER VARYING,
     p_table_name CHARACTER VARYING,
     p_lower_bound ANYELEMENT,
@@ -11,8 +11,8 @@ $$
 DECLARE
     var_sql TEXT;
 BEGIN
-    PERFORM partitining_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
-    PERFORM partitining_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_check_is_table_has_partitions(p_schema_name, p_table_name);
+    PERFORM partitioning_tool.fn_part_tools_create_default_partition(p_schema_name, p_table_name);
 
     IF (p_lower_bound  - '1 day'::interval < p_upper_bound  ) THEN
         var_sql = 'ALTER TABLE ' || p_schema_name || '.' || p_table_name || ' SPLIT PARTITION FOR ('
