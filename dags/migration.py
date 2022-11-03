@@ -25,7 +25,7 @@ MODULE_NAME = "partitioning_tables"
 
 
 with DAG(
-    dag_id=MODULE_NAME + '__yoyo__migration',
+    dag_id=MODULE_NAME + '_yoyo_migration',
     schedule_interval=None,
     start_date=pendulum.datetime(2021, 1, 1, tz="UTC"),
     catchup=False,

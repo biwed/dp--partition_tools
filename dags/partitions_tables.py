@@ -1,16 +1,16 @@
 import os
 import sys
 import json
+import yaml
+import glob
 from datetime import timedelta, datetime
 import logging
 import traceback
 from airflow import DAG
-from airflow.operators.postgres_operator import PostgresOperator
-from airflow.hooks.base_hook import BaseHook
+from airflow.providers.postgres.operators.postgres import PostgresOperator
+from airflow.decorators import dag, task
 
 
-dag_folder = os.path.dirname(os.path.abspath(__file__)) + "part_config"
-sys.path.insert(0, dag_folder)
 
 
 # Partition processing module name 0.0.3
@@ -18,18 +18,7 @@ DAG_OWNER_NAME = "bi_lab"
 CONNECTION_ID = "gp_db"
 POOL = "partitioning"
 PG_TARGET_CONNECTION_ID = 'bi_bot'
-
-def yoyo_migratioon(): 
-    from yoyo import read_migrations 
-    from yoyo import get_backend 
-    """Функция инициализирует клиента, для работы с S3. 
-    """ 
-    yoyo_uri = BaseHook.get_connection(PG_TARGET_CONNECTION_ID).get_uri() 
-    migrations = read_migrations('/yoyo/migrations') 
-    backend = get_backend(yoyo_uri) 
-    with backend.lock(): 
-        logging.info("Migration") 
-        backend.apply_migrations(backend.to_apply(migrations))
+MODULE_NAME = "partitioning_tool"
 
 
 def create_sql_query(table_name: str, schema_name: str, meta_object: dict) -> str:
@@ -62,76 +51,75 @@ def get_order(operations):
     return orders[item]
 
 
-def create_dag(dag_id, config):
-    try:
-        schema_name = config['schema']
-        tags = config['tags']
-        start_date = datetime.strptime(config['start_date'], '%Y-%m-%d')
-        access_list = config['access_control']
-        access_control = {item: {'can_dag_edit'} for item in access_list}
-        default_args = {
-            'owner': config['owner'],
-            'depends_on_past': False,
-            'start_date': start_date,
-            'retries': 4,
-            'retry_delay': timedelta(minutes=1),
-            'queue': 'partitioning',
-            'email': config['email'],
-            'email_on_failure': True,
-            'email_on_retry': False,
-            'pool': POOL
-        }
-        dag = DAG(
-            dag_id=dag_id,
-            default_args=default_args,
-            schedule_interval=config['schedule'],
-            max_active_runs=1,
-            tags=tags,
-            access_control=access_control
+
+def get_dag_key(path, file_name: str)-> str:
+    key_file = (file_name [len(path):]).replace("/","_").replace('.yaml','')
+    return key_file
+
+config_filepath = f'dags/partitioning_configs/'
+
+file_contents = []
+for filename in glob.glob(f'{config_filepath}*.yaml', recursive=True):
+    dag_id = MODULE_NAME + "_" + get_dag_key(config_filepath, filename)
+    with open(filename) as python_file:
+        file_contents.append(
+            (dag_id,
+            yaml.safe_load(python_file))
         )
-        for table_spec in config['tables']:
-            table_name = table_spec['table']
-            table_verif = PostgresOperator(
-                task_id=f'{table_name}_check_config',
-                sql=f"""select partitioning_tool.fn_part_tools_check_config(
-                    p_schema_name := '{schema_name}',
-                    p_table_name := '{table_name}',
-                    p_config := '{json.dumps(table_spec['operations'])}'::json
-                )""",
-                postgres_conn_id=CONNECTION_ID,
-                dag=dag
-            )
-            operations_config = table_spec['operations']
-            operations_config.sort(key=get_order)
-            cur_vertex = table_verif
-            for operation_id, oparetion_spec in enumerate(operations_config):
-                sql_query = create_sql_query(
-                    schema_name=schema_name,
-                    table_name=table_name,
-                    meta_object=oparetion_spec,
-                )
-                table_operations = PostgresOperator(
-                    task_id=f"{table_name}_{oparetion_spec['operation']}_{operation_id}",
-                    sql=sql_query,
-                    postgres_conn_id=CONNECTION_ID,
-                    dag=dag
-                )
-                cur_vertex >> table_operations
-                cur_vertex = table_operations
-        return dag
-    except Exception as e:
-        logging.error(f"Unable to create DAG {dag_id}: {traceback.format_exc()}")
-        logging.error(e)
+logging.info(file_contents)
+logging.info('Create partitonin_DAG')
+if file_contents is None:
+    @dag(
+        dag_id="error_file", 
+        start_date=datetime(2022, 2, 1),
+        tags=["partition_tables", "error"]
+        )
+    def dynamic_generated_dag():
+        @task
+        def print_message(message):
+            print(message)
 
-
-if base_url is not None:
-    schema_list = get_meta(base_url, api_endpoint, "dataplatform/processes/partitioning/v_2?list=true")
-    for schema in schema_list:
-        conf = get_meta(base_url, api_endpoint, f"dataplatform/processes/partitioning/v_2/{schema}")
-        dag_id = MODULE_NAME + '__' + schema
-        dag = create_dag(
-                dag_id,
-                conf
+        print_message(file_contents)
+    globals()[dag_id] = dynamic_generated_dag()
+else:
+    for (dag_id, config) in file_contents:
+        access_list = config['access_control']
+        @dag(
+            dag_id=dag_id, 
+            start_date=datetime.strptime(config['start_date'], '%Y-%m-%d'),
+            tags = config['tags']
             )
-        if dag is not None:
-            globals()[dag_id] = dag
+        def create_partitioning_dag():
+            logging.info(config)
+            schema_name = config['schema']
+            for table_spec in config['tables']:
+                table_name = table_spec['table']
+                table_verif = PostgresOperator(
+                    task_id=f'{table_name}_check_config',
+                    sql=f"""select partitioning_tool.fn_part_tools_check_config(
+                        p_schema_name := '{schema_name}',
+                        p_table_name := '{table_name}',
+                        p_config := '{json.dumps(table_spec['operations'])}'::json
+                    )""",
+                    postgres_conn_id=PG_TARGET_CONNECTION_ID,
+                    pool=POOL
+                )
+                operations_config = table_spec['operations']
+                operations_config.sort(key=get_order)
+                cur_vertex = table_verif
+                for operation_id, oparetion_spec in enumerate(operations_config):
+                    sql_query = create_sql_query(
+                        schema_name=schema_name,
+                        table_name=table_name,
+                        meta_object=oparetion_spec,
+                    )
+                    table_operations = PostgresOperator(
+                        task_id=f"{table_name}_{oparetion_spec['operation']}_{operation_id}",
+                        sql=sql_query,
+                        postgres_conn_id=PG_TARGET_CONNECTION_ID,
+                        pool=POOL
+                    )
+                    cur_vertex >> table_operations
+                    cur_vertex = table_operations
+        
+        globals()[dag_id]=create_partitioning_dag()
