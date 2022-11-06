@@ -59,7 +59,7 @@ def get_dag_key(path, file_name: str)-> str:
 config_filepath = f'dags/partitioning_configs/'
 
 file_contents = []
-for filename in glob.glob(f'{config_filepath}*.yaml', recursive=True):
+for filename in glob.glob(f'{config_filepath}*/*.yaml', recursive=True):
     dag_id = MODULE_NAME + "_" + get_dag_key(config_filepath, filename)
     with open(filename) as python_file:
         file_contents.append(

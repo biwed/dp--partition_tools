@@ -20,6 +20,6 @@ BEGIN
         t.schemaname = p_schema_name
         AND t.tablename = p_table_name
     LIMIT 1;
-    RETURN quote_literal(var_owner);
+    RETURN quote_ident(var_owner);
 END
 $$;
