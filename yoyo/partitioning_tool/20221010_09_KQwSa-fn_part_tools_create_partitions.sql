@@ -22,7 +22,7 @@ begin
     SELECT
         min(bound)::DATE, max(bound)::DATE INTO var_min_date, var_max_date
             FROM (
-                    SELECT generate_dates('1990-01-01', now() - p_upper_bound, p_granularity) AS bound
+                    SELECT partitioning_tool.generate_dates('1990-01-01', now() - p_upper_bound, p_granularity) AS bound
             ) q
         WHERE bound > now() - p_lower_bound;
     PERFORM partitioning_tool.fn_part_tools_create_operation(
