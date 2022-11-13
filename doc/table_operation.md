@@ -58,7 +58,8 @@ PARTITION BY RANGE (opened_date) (DEFAULT PARTITION other);
 **Проверяем схемы на отсутствие пробелов в датах между менеджерами create и merge.**
 Перекрытие create и merge приветствуется. Вызов менеждеров согласно очередности по операциям и очередности в YAML схеме. Проверяем для каждой таблицы запросом:
 ``` sql 
-SELECT *
+SELECT 
+    *
 FROM partitioning_tool.fn_part_tools_get_config_intvals(
 $$ [
     {
@@ -91,7 +92,8 @@ FROM pg_tablespace
 
 **Определение интервалов для одной таблицы:**
 ```sql
-SELECT *
+SELECT 
+  *
 FROM partitioning_tool.fn_part_tools_get_config_intvals(
 $$ [
     {
@@ -138,7 +140,8 @@ SELECT partitioning_tool.fn_part_tools_check_config(
 
 **Функция проверки расположения партиций по табличным пространстам:**
 ```sql
-SELECT *
+SELECT 
+  *
 FROM partitioning_tool.fn_part_tools_get_part_table_spase('partitioning_tool', 'sales_test')
 ```
 
