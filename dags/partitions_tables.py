@@ -1,23 +1,12 @@
-import os
-import sys
 import json
 import yaml
 import glob
-from datetime import timedelta, datetime
+from datetime import datetime
 import logging
-import traceback
-from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 from airflow.decorators import dag, task
 
-
-
-
-# Partition processing module name 0.0.3
-DAG_OWNER_NAME = "bi_lab"
-CONNECTION_ID = "gp_db"
 POOL = "partitioning"
-PG_TARGET_CONNECTION_ID = 'bi_bot'
 MODULE_NAME = "partitioning_tool"
 
 
@@ -83,7 +72,6 @@ if file_contents is None:
     globals()[dag_id] = dynamic_generated_dag()
 else:
     for (dag_id, config) in file_contents:
-        access_list = config['access_control']
         @dag(
             dag_id=dag_id, 
             start_date=datetime.strptime(config['start_date'], '%Y-%m-%d'),
@@ -92,6 +80,7 @@ else:
         def create_partitioning_dag():
             logging.info(config)
             schema_name = config['schema']
+            connection_id = config['connection_id']
             for table_spec in config['tables']:
                 table_name = table_spec['table']
                 table_verif = PostgresOperator(
@@ -101,7 +90,7 @@ else:
                         p_table_name := '{table_name}',
                         p_config := '{json.dumps(table_spec['operations'])}'::json
                     )""",
-                    postgres_conn_id=PG_TARGET_CONNECTION_ID,
+                    postgres_conn_id=connection_id,
                     pool=POOL
                 )
                 operations_config = table_spec['operations']
@@ -116,7 +105,7 @@ else:
                     table_operations = PostgresOperator(
                         task_id=f"{table_name}_{oparetion_spec['operation']}_{operation_id}",
                         sql=sql_query,
-                        postgres_conn_id=PG_TARGET_CONNECTION_ID,
+                        postgres_conn_id=connection_id,
                         pool=POOL
                     )
                     cur_vertex >> table_operations

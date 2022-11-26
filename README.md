@@ -30,17 +30,17 @@ docker-compose build
 docker-compose up -d
 ```
 Тестирование:
-- создание таблиц необходимых для проведения тестов находится в файле  [test_sql/test_partition.sql](./test_sql/test_partition.sql)
-- создать подключение, которое необходимо для работы с GP. Доступы см. ниже.
+- создать подключение bi_bot, которое необходимо для работы с GP. Доступы см. ниже.
 - создание s3 бакета (dp-partition) на minio. Это назавание определенно в качестве параметра по умолчанию в хранимой процедуре. partitioning_tool.fn_part_tools_unload_to_s3_partitions
 - запуск DAG который выполнит миграцию.
+- создание таблиц необходимых для проведения тестов находится в файле  [test_sql/test_partition.sql](./test_sql/test_partition.sql)
 - запуск DAG нарезки партиций по написанной  [yaml](./dags/partitioning_configs/greenplum/test_part.yaml) схеме.
 Более подробнее на видео.
 
 ## Доступы
 Доступы все можно увидеть в файле  [docker-compose.yaml](./docker-compose.yaml)
-- Airflow- host: localhost:8080 login: airflow password: airflow
-- Greenplum-  host: localhost (из airflow gpdb) port: 5432, login test, password: test
+- Airflow - host: localhost:8080 login: airflow password: airflow
+- Greenplum - host: localhost (из airflow gpdb) port: 5432, db: greenplum, login test, password: test.
 - Minio - host: localhost:9001 login: minio, password: minio123
 - Доступ из Greenplum в Minio расположен в файле config/minio-site.xml
 

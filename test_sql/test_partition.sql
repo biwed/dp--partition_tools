@@ -1,10 +1,11 @@
 /*
-- Создать подключние
-- Создать бакет
+Генерация таблиц.
+- Создать подключние!!
+- Создать бакет!!
 */
 
 CREATE EXTENSION IF NOT EXISTS pxf;
-CREATE TABLESPACE warm LOCATION '/data1/warm'
+CREATE TABLESPACE warm LOCATION '/data1/warm';
 
 CREATE SCHEMA IF NOT EXISTS test_part;
 
@@ -122,33 +123,3 @@ select
       )::int + 1 as amt
 from
     test;
-
-
-/*check*/
-SELECT *
-FROM test_part.sales_test_1;
-
-
-SELECT 
-    *
-FROM 
-    partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test');
-
-SELECT 
-    *
-FROM 
-    partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test_1');
-
-SELECT 
-    *
-FROM 
-    partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test_2');
-
-SELECT 
-    *
-FROM 
-    partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test_3');
-
-select 
-    *
-from partitioning_tool.fn_part_tools_get_part_table_spase('test_part', 'sales_test_4');
