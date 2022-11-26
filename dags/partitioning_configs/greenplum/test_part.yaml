@@ -1,15 +1,12 @@
 kind: partitioning
-api: v2
+api: v1
+start_date: "2022-11-04"
+schedule: 0 1 * * *
+connection_id: bi_bot
 schema: test_part
 tags:
   - partitioning tools
-email:
-  - no_@mail.ru
-start_date: "2022-11-04"
-owner: c
-access_control:
-  - test
-schedule: 0 1 * * *
+  - test_part
 tables:
   - table: sales_test
     operations:
@@ -47,6 +44,7 @@ tables:
         lower_bound: 10 year
         upper_bound: 2 month
         table_space: warm
+        ddl_with_param: WITH (appendonly = ''true'', compresslevel = ''1'', orientation = ''column'', compresstype = zstd)
   - table: sales_test_2
     operations:
       - operation: create_partitions

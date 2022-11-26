@@ -50,7 +50,6 @@ BEGIN
                 || ' WITH TABLE ' || var_tmp_table_name_part
                 || '; drop table '|| var_tmp_table_name_part || ';';
 
-    --Добавить формирование скрипта сравнения количества строк в партициях и в новой таблице. через UNION ALL.
     var_insert_sql = var_insert_sql || ' INSERT INTO ' || var_tmp_table_name_part 
         || ' select * from ' || p_schema_name || '.'
         || var_name_part || ';';
